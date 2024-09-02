@@ -1,0 +1,4 @@
+{{- range .Variables }}
+$env:{{ . }}='{ secret }'
+{{- end }}
+Clear-History -Count 1 -Newest

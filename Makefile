@@ -2,6 +2,7 @@ BIN := offcook
 PREFIX := github.com/gkwa/offcook/version
 
 SRC := $(shell find . -name '*.go')
+TEMPLATES := $(shell find ./core/templates -name '*.tmpl')
 
 DATE := $(shell date +"%Y-%m-%dT%H:%M:%SZ")
 GOVERSION := $(shell go version)
@@ -27,14 +28,14 @@ iterate: check $(BIN)
 .PHONY: check # lint and vet
 check: .timestamps/.check.time
 
-.timestamps/.check.time: goimports tidy golines fmt lint vet
+.timestamps/.check.time: goimports tidy  fmt lint vet
 	@mkdir -p .timestamps
 	@touch $@
 
 .PHONY: build # build
 build: $(BIN)
 
-$(BIN): .timestamps/.build.time .timestamps/.tidy.time
+$(BIN): .timestamps/.build.time .timestamps/.tidy.time $(TEMPLATES)
 	go build -ldflags "$(LDFLAGS)" -o $@
 
 .timestamps/.build.time: $(SRC)

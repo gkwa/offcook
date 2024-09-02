@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gkwa/offcook/core"
+
 	"github.com/go-logr/logr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -21,18 +23,19 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "offcook",
-	Short: "A brief description of your application",
-	Long:  `A longer description that spans multiple lines and likely contains examples and usage of using your application.`,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		// Initialize the console logger just before running
-		// a command only if one wasn't provided. This allows other
-		// callers (e.g. unit tests) to inject their own logger ahead of time.
-		if cliLogger.IsZero() {
-			cliLogger = logger.NewConsoleLogger(verbose, logFormat == "json")
-		}
+	Short: "offcook is a tool for managing environment variables",
+	Long:  `offcook generates scripts for various shells and tools to set environment variables.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		vars, _ := cmd.Flags().GetStringSlice("var")
 
-		ctx := logr.NewContext(context.Background(), cliLogger)
-		cmd.SetContext(ctx)
+		logger := LoggerFrom(cmd.Context())
+		executor := core.NewTemplateExecutor(logger)
+
+		err := executor.ExecuteToWriter(vars, os.Stdout)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
 
@@ -45,6 +48,12 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	rootCmd.Flags().StringSlice("var", []string{}, "List of environment variables")
+	if err := rootCmd.MarkFlagRequired("var"); err != nil {
+		fmt.Printf("Error marking 'var' flag as required: %v\n", err)
+		os.Exit(1)
+	}
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.offcook.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "enable verbose mode")

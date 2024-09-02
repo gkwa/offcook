@@ -1,0 +1,5 @@
+set +o history
+{{- range .Variables }}
+export {{ . }}='{ secret }'
+{{- end }}
+set -o history

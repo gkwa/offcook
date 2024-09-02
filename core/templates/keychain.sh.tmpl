@@ -1,0 +1,9 @@
+{{- range .Variables -}}
+security delete-internet-password -a {{ . }}
+set +o history
+security add-internet-password -a {{ . }} -s {{ . }} -w "${{ . }}"
+set -o history
+{{ . }}=$(security find-internet-password -a {{ . }} -s {{ . }} -w)
+export {{ . }}
+echo ${{ . }}
+{{- end }}

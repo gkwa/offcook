@@ -1,0 +1,5 @@
+choco install awscli
+{{- range .Variables }}
+&"C:\Program*\Amazon\AWSCLI*\aws.exe" configure set {{ . }} "$env:{{ . }}"
+{{- end }}
+Clear-History -Count 1 -Newest

@@ -1,0 +1,5 @@
+set +o history
+{{- range .Variables }}
+aws configure set {{ . }} "${{ . }}"
+{{- end }}
+set -o history
